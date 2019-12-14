@@ -94,9 +94,9 @@ class OutcomeAnalysis:
             raise Exception('Set can only be train or test')
 
     
-    def traj_dynamic_info(self, ids, from_set, seg_detail_info=False):
+    def traj_dynamic_info(self, ids, from_set, seg_detail_info=False, return_origin_traj=False):
         """Get speed, time, distance information of trajecotries"""
-        trajs, _, times = self.extract_traj(ids, from_set, get_time=True)
+        trajs, middle_points, times = self.extract_traj(ids, from_set, get_time=True)
         trip_distance = []  # length of each trajectory
         trip_time = []
         trip_avg_speed = []
@@ -105,7 +105,6 @@ class OutcomeAnalysis:
         traj_seg_distance = []
         traj_seg_time = []
         traj_seg_speed = []
-
 
         for index, traj in enumerate(trajs):
             assert len(traj) == len(times[index]), 'traj len should be same with timestamp'
@@ -136,7 +135,10 @@ class OutcomeAnalysis:
             'TripTime': trip_time, 'TripAvgSpeed': trip_avg_speed, 'SegDistance': traj_seg_distance,
             'SegTime': traj_seg_time, 'SegSpeed': traj_seg_speed})
         df.index = ids
-        return df
+        if not return_origin_traj:
+            return df
+        else:
+            return df, (trajs, middle_points, times)
 
     def _load_train_labels(self):
         num = self.train_h5.attrs['traj_nums']
